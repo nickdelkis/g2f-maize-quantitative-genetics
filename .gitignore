@@ -1,0 +1,27 @@
+# Large data files
+data/raw/*.csv
+data/raw/*.vcf
+data/raw/*.txt
+!data/raw/.gitkeep
+
+# R files
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# Python files
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+*.pyc
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Large result files
+*.rds
+*.RDS
+results/*.pdf
