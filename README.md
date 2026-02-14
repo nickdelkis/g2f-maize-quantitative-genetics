@@ -27,3 +27,47 @@ phenotypic data from 272 environments (2014-2023).
 In modern breeding programs, GWAS identifies causal biology while ML models 
 optimize selection. This portfolio demonstrates capability in both discovery 
 and application.
+
+## Setup Instructions
+
+### Prerequisites
+- R (>= 4.3.0)
+- Python (>= 3.12.0)
+- Git
+
+### Installation
+
+#### 1. Clone Repository
+```bash
+git clone https://github.com/YOUR_USERNAME/g2f-maize-quantitative-genetics.git
+cd g2f-maize-quantitative-genetics
+```
+
+#### 2. Download Data
+See [data/README.md](data/README.md) for data download instructions.
+
+#### 3. R Environment Setup
+Open RStudio in this directory:
+```r
+# Install renv if needed
+install.packages("renv")
+
+# Restore R packages from lockfile
+renv::restore()
+```
+
+This installs all R packages listed in `renv.lock`.
+
+#### 4. Python Environment Setup
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate environment
+source venv/Scripts/activate  # Git Bash on Windows
+# OR
+venv\Scripts\activate  # PowerShell on Windows
+
+# Install packages
+pip install -r requirements.txt
+```
