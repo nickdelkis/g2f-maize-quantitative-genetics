@@ -11,6 +11,15 @@ data/raw/*.txt
 .Ruserdata
 *.Rproj
 
+# R environment
+renv/library/
+renv/local/
+renv/cellar/
+renv/lock/
+renv/python/
+renv/sandbox/
+renv/staging/
+
 # Python files
 __pycache__/
 *.py[cod]
