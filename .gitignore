@@ -34,3 +34,7 @@ Thumbs.db
 *.rds
 *.RDS
 results/*.pdf
+# Python virtual environment
+venv/
+env/
+ENV/
