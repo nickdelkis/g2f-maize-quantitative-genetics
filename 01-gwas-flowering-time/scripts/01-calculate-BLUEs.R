@@ -53,7 +53,8 @@ library(emmeans)
 hybrid_blues <- emmeans(model_blues, specs = ~ Hybrid, pbkrtest.limit = 63189)
 
 # Convert to data frame
-blues_df <- as.data.frame(hybrid_blues)
+blues_df <- as.data.frame(hybrid_blues) %>%
+  select(Hybrid, emmean, SE)
 
 # Examine
 head(blues_df, 10)  # Look at first 10
@@ -65,4 +66,35 @@ summary(blues_df$SE)      # Range of standard errors
 
 # Create a histogram showing the distribution of your BLUE values
 
-hist(blues_df$emmean, bin)
+hist(blues_df$emmean)
+
+blues_hist <- ggplot(blues_df, aes(x = emmean)) + 
+  geom_histogram(bins = 50, fill = "lightblue", color = "black") +
+  geom_vline(xintercept = median(blues_df$emmean), 
+                     color = "red", linetype = "dashed", size = 1) +
+  labs(title = "Histogram of BLUEs calcualted means", x = "Flowering Time BLUE (Days After Planting)", y = "Frequency") +
+  theme(plot.title = element_text(size = 14, hjust = 0.5))
+  
+
+
+# Is the distribution approximately normal?
+# Any signs of bimodality (two peaks)?
+# Where do most hybrids cluster?
+
+# Show that hybrids tested in more environments have lower uncertainty
+
+# Group by hybrid, distinct environments and total observations
+env_by_hybrid <- gwas_data %>%
+  group_by(Hybrid) %>%
+  summarize(n_environments = n_distinct(Env),
+            n_observations = n())
+
+# Join with blues DF by Hybrid
+blues_df <- blues_df %>%
+  left_join(env_by_hybrid, by = "Hybrid")
+
+plot(x=blues_df$n_environments, y=blues_df$SE,
+     xaxp = c(1, 100, 20),
+     main = "Scatter plot Distinct Environments by Standard Error",
+     xlab = "Distinct Environments per Hybrid",
+     ylab = "Flowering time prediction Standard Error")
