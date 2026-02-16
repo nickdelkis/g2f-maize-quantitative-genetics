@@ -182,6 +182,8 @@ ggsave("01-gwas-flowering-time/figures/year_selection.png", width = 8, height = 
 # Save for next analysis step
 write_csv(gwas_data, "data/processed/gwas_phenotypes_2018-2021.csv")
 
+write_csv(year_summary, "01-gwas-flowering-time/results/year_summary.csv")
+
 # === DECISION: Use 2018-2021 for GWAS ===
 # 
 # Rationale:
