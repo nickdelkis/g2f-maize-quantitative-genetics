@@ -155,3 +155,6 @@ nrow(flowering_blues_for_gwas)
 
 # Any NAs?
 sum(is.na(flowering_blues_for_gwas))
+
+# Save as CSV for further use
+write_csv(flowering_blues_for_gwas, file = "data/processed/flowering_BLUEs_for_GWAS.csv")
