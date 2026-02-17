@@ -48,7 +48,6 @@ summary(model_blues)
 #   BLUE = Intercept + Hybrid_effect + average(Environment_effects)
 
 # Extract hybrid BLUEs using emmeans
-library(emmeans)
 
 hybrid_blues <- emmeans(model_blues, specs = ~ Hybrid, pbkrtest.limit = 63189)
 
@@ -68,12 +67,16 @@ summary(blues_df$SE)      # Range of standard errors
 
 hist(blues_df$emmean)
 
-blues_hist <- ggplot(blues_df, aes(x = emmean)) + 
+blues_hist <- ggplot(blues_df, aes(x = emmean)) +
+  theme_bw() +
   geom_histogram(bins = 50, fill = "lightblue", color = "black") +
   geom_vline(xintercept = median(blues_df$emmean), 
-                     color = "red", linetype = "dashed", size = 1) +
-  labs(title = "Histogram of BLUEs calcualted means", x = "Flowering Time BLUE (Days After Planting)", y = "Frequency") +
+                     color = "red", linetype = "dashed", linewidth = 1) +
+  annotate("text", x = 63, y = 210, label = "Median") +
+  labs(title = "Histogram of BLUEs calculated means", x = "Flowering Time BLUE (Days After Planting)", y = "Frequency") +
   theme(plot.title = element_text(size = 14, hjust = 0.5))
+ggsave("01-gwas-flowering-time/figures/BLUE_distribution.png", 
+       blues_hist, width = 8, height = 5)
   
 
 
@@ -93,8 +96,62 @@ env_by_hybrid <- gwas_data %>%
 blues_df <- blues_df %>%
   left_join(env_by_hybrid, by = "Hybrid")
 
-plot(x=blues_df$n_environments, y=blues_df$SE,
-     xaxp = c(1, 100, 20),
-     main = "Scatter plot Distinct Environments by Standard Error",
-     xlab = "Distinct Environments per Hybrid",
-     ylab = "Flowering time prediction Standard Error")
+# Find which n_environments and after are SE<1
+
+se_by_env <- blues_df %>%
+  group_by(n_environments) %>%
+  summarise(median_SE_per_n_env = median(SE)) %>%
+  filter(median_SE_per_n_env<1.1) %>%
+  arrange(desc(median_SE_per_n_env))
+
+head(se_by_env)
+# After 10 distinct environments, median SE drops below 1
+
+# Make the scatter plot
+scatter_plot <- ggplot(blues_df, aes(x = n_environments, y = SE)) +
+  geom_point() +
+  geom_smooth() +
+  labs(title = "Scatter plot Distinct Environments by Standard Error",
+       x = "Distinct Environments per Hybrid",
+       y = "Flowering time prediction Standard Error") +
+  theme_bw() +
+theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  geom_hline(yintercept = 1.0, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = 10, linetype = "dashed", color = "red") +
+  annotate("text",x = 31.5, y = 1.04, label = "Median SE<1 after 10 Distinct Environments")
+ggsave("01-gwas-flowering-time/figures/SE_vs_environments.png", 
+       scatter_plot, width = 8, height = 5)
+
+# Histogram of n_environments
+# Calculate median per Hybrid
+n_env_median <- median(blues_df$n_environments)
+
+n_env_hist <- ggplot(blues_df, aes(x = n_environments)) +
+  theme_bw() +
+  geom_histogram(bins = 50, fill = "lightblue", color = "black") +
+  geom_vline(xintercept = median(n_env_median), 
+             color = "red", linetype = "dashed", linewidth = 1) +
+  annotate("text", x = 27, y = 210, label = paste("Median = ", n_env_median)) +
+  labs(title = "Histogram of distinct Environments per Hybrid", x = "Distinct Environments per Hybrid", y = "Frequency") +
+  theme(plot.title = element_text(size = 14, hjust = 0.5))
+ggsave("01-gwas-flowering-time/figures/n_env_distribution.png", 
+       n_env_hist, width = 8, height = 5)
+
+# How many hybrids were tested in fewer than 10 environments?
+
+blues_df %>%
+  filter(n_environments < 10) %>%
+  summarise(hybrids_below_10_env = n_distinct(Hybrid))
+ 
+# Select Hybrid and emmean and rename to Taxa and Flowering_BLUE for GWAS
+
+flowering_blues_for_gwas <- blues_df %>%
+  select(Hybrid, emmean) %>%
+  rename(Taxa = Hybrid,
+         Flowering_BLUE = emmean)
+
+# How many hybrids for GWAS?
+nrow(flowering_blues_for_gwas)
+
+# Any NAs?
+sum(is.na(flowering_blues_for_gwas))
