@@ -120,19 +120,28 @@ geno_hybrids <- colnames(gt_numeric_filtered_maf)
 hybrid_overlap <- geno_hybrids %in% pheno_hybrids
 table(hybrid_overlap)
 
+# Subset and keep only overlapping hybrids
+
 gt_numeric_filtered_maf_subset <- gt_numeric_filtered_maf[, hybrid_overlap]
 
+# check dimensions
 dim(gt_numeric_filtered_maf_subset)
 
+# checks
 length(colnames(gt_numeric_filtered_maf_subset))
 
+# do colnames match?
 all(colnames(gt_numeric_filtered_maf_subset) == flowering_blues_for_gwas$Taxa)
 
+# transpose and prepare for GAPIT - rownames are Taxa, first column)
 gt_numeric_filtered_maf_subset_transpose <- t(gt_numeric_filtered_maf_subset) %>%
   as.data.frame() %>%
   mutate(Taxa = rownames(gt_numeric_filtered_maf_subset_transpose)) %>%
   select(Taxa, everything())
+
+# Check how it looks
 dim(gt_numeric_filtered_maf_subset_transpose)
 head(gt_numeric_filtered_maf_subset_transpose, c(5,5))
 
+# Save file
 write_csv(gt_numeric_filtered_maf_subset_transpose, file = "data/processed/genotypes_for_GWAS.csv")
