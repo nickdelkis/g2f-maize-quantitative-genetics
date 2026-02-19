@@ -123,7 +123,7 @@ table(hybrid_overlap)
 # Subset and keep only overlapping hybrids
 
 gt_numeric_filtered_maf_subset <- gt_numeric_filtered_maf[, hybrid_overlap]
-
+sum(is.na(gt_numeric_filtered_maf_subset))
 # check dimensions
 dim(gt_numeric_filtered_maf_subset)
 
@@ -132,6 +132,16 @@ length(colnames(gt_numeric_filtered_maf_subset))
 
 # do colnames match?
 all(colnames(gt_numeric_filtered_maf_subset) == flowering_blues_for_gwas$Taxa)
+
+# Middle/mean impute missing SNP data
+
+for(i in 1:nrow(gt_numeric_filtered_maf_subset)) {
+  row_mean <- mean(gt_numeric_filtered_maf_subset[i, ], na.rm = TRUE)
+  # Replace NAs with row mean
+  gt_numeric_filtered_maf_subset[i, is.na(gt_numeric_filtered_maf_subset[i, ])] <- round(row_mean)
+}
+
+sum(is.na(gt_numeric_filtered_maf_subset))
 
 # transpose and prepare for GAPIT - rownames are Taxa, first column)
 gt_numeric_filtered_maf_subset_transpose <- t(gt_numeric_filtered_maf_subset) %>%
@@ -142,6 +152,23 @@ gt_numeric_filtered_maf_subset_transpose <- t(gt_numeric_filtered_maf_subset) %>
 # Check how it looks
 dim(gt_numeric_filtered_maf_subset_transpose)
 head(gt_numeric_filtered_maf_subset_transpose, c(5,5))
-
+sum(is.na(gt_numeric_filtered_maf_subset_transpose))
 # Save file
-write_csv(gt_numeric_filtered_maf_subset_transpose, file = "data/processed/genotypes_for_GWAS.csv")
+write_csv(gt_numeric_filtered_maf_subset_transpose, file = "~/g2f-maize-quantitative-genetics/data/processed/genotypes_for_GWAS.csv")
+
+# Create genotype map and filter for snps and maf
+genotype_map <- vcf@fix %>%
+  as.data.frame() %>%
+  select(ID, CHROM, POS) %>%
+  rename(SNP = ID,
+         Chromosome = CHROM,
+         Position = POS)
+
+gneotype_map_keep_snps <- genotype_map[keep_snps, ]
+
+genotype_map_keep_snps_maf <- gneotype_map_keep_snps[MAF_keep, ]
+
+sum(is.na(genotype_map_keep_snps_maf))
+
+# Save file 
+write_csv(genotype_map_keep_snps_maf, file = "~/g2f-maize-quantitative-genetics/data/processed/SNP_map_for_GWAS.csv")
