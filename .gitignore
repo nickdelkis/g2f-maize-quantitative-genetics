@@ -40,3 +40,8 @@ results/*.pdf
 venv/
 env/
 ENV/
+# GAPIT output files
+01-gwas-flowering-time/results/gwas-output/*.pdf
+01-gwas-flowering-time/results/gwas-output/*.csv
+01-gwas-flowering-time/results/gwas-output/*.txt
+01-gwas-flowering-time/results/gwas-output/*.RData
