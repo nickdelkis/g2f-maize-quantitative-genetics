@@ -4,21 +4,15 @@
 
 library(tidyverse)
 
-dir.create("02-yield-prediction/figures", recursive = TRUE, showWarnings = FALSE)
-dir.create("02-yield-prediction/results", recursive = TRUE, showWarnings = FALSE)
-
-# Compare against numbers already recorded in CLAUDE.md, so a re-run flags drift
-check <- function(label, observed, expected) {
-  status <- if (isTRUE(all.equal(observed, expected, tolerance = 1e-3))) "OK" else "MISMATCH"
-  cat(sprintf("[%s] %s: observed %s, expected %s\n", status, label, observed, expected))
-}
+source("02-yield-prediction/scripts/utils.R")
 
 #### Load ####
 
-# guess_max raised because several columns (Range, Pass, Twt_kg_m3) are NA for
-# the first thousands of rows, which makes readr guess the wrong type
+# Guess types from every row: several columns (Range, Pass, Twt_kg_m3) are NA for
+# long stretches, and a column that is all NA in the guessed rows becomes logical,
+# silently turning its later values into NA
 trait_data <- read_csv("data/raw/1_Training_Trait_Data_2014_2023.csv",
-                       guess_max = 50000, show_col_types = FALSE)
+                       guess_max = Inf, show_col_types = FALSE)
 
 glimpse(trait_data)
 
@@ -45,9 +39,10 @@ check("Environments", overview$environments, 272)
 
 yield_pct <- mean(!is.na(trait_data$Yield_Mg_ha)) * 100
 cat(sprintf("Yield_Mg_ha non-missing: %.1f%%\n", yield_pct))
-check("Yield coverage (%)", round(yield_pct, 1), 94.8)
+check("Yield coverage (%)", round(yield_pct, 1), 94.8, abs_tol = 0.05)
 
-summary(trait_data$Yield_Mg_ha)
+# print() so the summary also shows when the script is source()d
+print(summary(trait_data$Yield_Mg_ha))
 
 # Environments with no yield at all can't contribute to training and would
 # silently vanish in later joins, so name them now
