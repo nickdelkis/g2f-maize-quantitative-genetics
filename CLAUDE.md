@@ -109,7 +109,7 @@ Findings below are **provisional** until the fix exercises are done.
 - [x] Exercise 1: Orient in trait data (173,960 rows, 94.8% yield coverage, 2014–2023) — `scripts/01-explore-trait-data.R`
 - [x] Exercise 2: Check auxiliary file coverage (table above) — `scripts/02-check-auxiliary-coverage.R`
   - Rebuilt 2026-10; all `[OK]` checks pass on real data. 0 envs lack yield entirely; 45 locations, 5,205 hybrids
-- [ ] Exercise 2 remaining: Identify useful ML features from meta file
+- [ ] Exercise 2 remaining: Meta feature audit → `results/meta_feature_audit.csv` (column, decision, reason) — apply the legitimacy filter below
 - [ ] Exercise 3: Yield distribution and coverage deep-dive
 - [ ] Exercise 3 also: variance decomposition `Yield ~ (1|Env) + (1|Hybrid) + (1|Env:Hybrid)` — sets the ceiling per phase; confirm 2-year hybrid/tester blocks across all years
 - [ ] Exercise 4: Load and validate numerical genotype file (must contain 0/1/2; hybrids sharing a parent must differ)
@@ -139,6 +139,25 @@ Findings below are **provisional** until the fix exercises are done.
 - *Fold assignments* saved once to `data/processed/` and shared by R and Python.
 - *Excluded features (post-hoc measurements):* `Date_Harvested`, `Grain_Moisture`, `Twt_kg_m3`, lodging,
   plant/ear height. `Stand_Count_plants` borderline — justify if used.
+
+**Feature selection (decided) — two separate questions:**
+1. *Is a feature allowed?* — answered by domain rules in the audits (Exercise 2, and later soil/weather/EC).
+   Drop **only** for legitimacy: leakage (recorded after the fact, e.g. damage comments, harvest dates),
+   IDs in disguise (farm/field/trial codes — the model memorises sites instead of learning site properties),
+   empty/constant columns, exact duplicates. **Default is keep** — "maybe useless" is for the model to decide.
+   Rationale: leakage and ID columns *win* performance contests, so score-based selection can't police them.
+2. *Is a feature useful?* — answered empirically, **always inside the CV loop** (selecting on all data, then
+   CV-ing, gives optimistic scores):
+   - Phase A selection runs on **environment-mean yield (272 rows)**, since env features only explain env-level
+     variance — fast enough for thousands of fits. The chosen env set is then carried into row-level Phase B/C models.
+   - Methods: lasso/elastic-net path (cheap first pass); block ablation (drop meta / soil / weather / EC as
+     whole groups); recursive feature elimination by permutation importance (drop weakest 10–20% per round).
+     Not one-at-a-time backward elimination — ~p² fits and it overfits the CV.
+   - Pick with the **1-SE rule**: simplest model within one standard error of the best.
+   - Report **selection stability**: how many of the 10 folds selected each feature. Expect correlated features
+     (e.g. adjacent-month temperatures) to trade places — interpret groups, not single winners.
+3. *Portfolio leakage demo:* deliberately add one leakage column and one farm ID; show the score rises under
+   random CV and in the LOYO known-location cell, then collapses in the new-location cell.
 
 ---
 
