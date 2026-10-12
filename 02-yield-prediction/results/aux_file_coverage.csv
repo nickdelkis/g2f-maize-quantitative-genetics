@@ -1,0 +1,5 @@
+file,envs_in_file,envs_not_in_trait,envs_matched,pct_trait_envs,pct_yield_plots
+meta,272,0,272,100,100
+soil,186,0,186,68.4,74.1
+weather,269,0,269,98.9,99.2
+ec,241,0,241,88.6,88.5

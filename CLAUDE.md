@@ -42,9 +42,11 @@ g2f-maize-quantitative-genetics/
 |---|---|---|
 | `1_Training_Trait_Data_2014_2023.csv` | All phenotypes, 173,960 rows × 26 cols | Main trait file |
 | `2_Training_Meta_Data_2014_2023.csv` | Environment metadata | 272 envs, 100% overlap with trait |
-| `3_Training_Soil_Data_2015_2023.csv` | Soil properties | 186 envs, 68.4% overlap — weakest file |
-| `4_Training_Weather_Data_2014_2023_seasons_only.csv` | Weather by growth stage | 269 envs, 98.9% overlap |
+| `3_Training_Soil_Data_2015_2023.csv` | Soil properties, 36 cols | 186 envs, 68.4% of envs / 74.1% of yield plots — weakest file |
+| `4_Training_Weather_Data_2014_2023_seasons_only.csv` | **Daily** NASA POWER weather over the growing season (`Env`, `Date`, 16 vars) — up to 241 rows/env, must be aggregated before joining | 269 envs, 98.9% overlap |
+| `4_Training_Weather_Data_2014_2023_full_year.csv` | Same, full calendar year | Not yet used |
 | `6_Training_EC_Data_2014_2023.csv` | Derived environmental covariates, 655 cols | 241 envs, 88.6% overlap |
+| `key_inbreds_G2F_2014-2025.txt` | Inbred parent key | Not yet explored |
 | `5_Genotype_Data_All_2014_2025_Hybrids.vcf` | Raw VCF | Not re-parsed — use numerical file |
 | `5_Genotype_Data_All_2014_2025_Hybrids_numerical.txt` | SNP dosage matrix | Preferred for ML |
 
@@ -106,7 +108,7 @@ Findings below are **provisional** until the fix exercises are done.
 **Todo (current position: mid-Exercise 2):**
 - [x] Exercise 1: Orient in trait data (173,960 rows, 94.8% yield coverage, 2014–2023) — `scripts/01-explore-trait-data.R`
 - [x] Exercise 2: Check auxiliary file coverage (table above) — `scripts/02-check-auxiliary-coverage.R`
-  - Both scripts were rebuilt 2026-10 and tested only on synthetic data; run on real data and confirm the `[OK]` checks
+  - Rebuilt 2026-10; all `[OK]` checks pass on real data. 0 envs lack yield entirely; 45 locations, 5,205 hybrids
 - [ ] Exercise 2 remaining: Identify useful ML features from meta file
 - [ ] Exercise 3: Yield distribution and coverage deep-dive
 - [ ] Exercise 3 also: variance decomposition `Yield ~ (1|Env) + (1|Hybrid) + (1|Env:Hybrid)` — sets the ceiling per phase; confirm 2-year hybrid/tester blocks across all years
@@ -165,6 +167,6 @@ Findings below are **provisional** until the fix exercises are done.
 - **Hybrid genotypes:** Correct dosage is 0/1/2 — genotype 2 occurs whenever both parents carry ALT. The earlier "only 0/1" observation was the vcfR `as.numeric` bug (see GWAS section)
 - **GAPIT effect sizes:** Reported assuming 0/1/2 dosage — always validate against observed genotype-stratified means
 - **BLUEs vs BLUPs:** BLUEs used for GWAS (fixed effects, no shrinkage); BLUPs would attenuate allele effects
-- **Soil data starts 2015:** 2014 rows (and ~30% of envs overall) lack soil — plan: fill from same `Field_Location` in other years + missing-indicator flag
+- **Soil gaps:** 86 envs lack soil — all of 2014, but also 2018 (only 38% covered) and 2015 (56%). Filling from the same `Field_Location` in another year recovers 76 of 86; 10 stay missing → also add a missing-indicator flag
 - **Meta column names are messy:** Long strings with special characters; will need renaming before use
 - **EC file has 655 columns:** Derived crop model outputs by growth stage — rich but needs selection/reduction
