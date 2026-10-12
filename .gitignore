@@ -8,6 +8,7 @@ data/raw/*.txt
 .Rproj.user/
 .Rhistory
 .RData
+*.RData
 .Ruserdata
 .Rprofile
 *.Rproj
