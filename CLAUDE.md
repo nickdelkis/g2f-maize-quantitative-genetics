@@ -104,8 +104,9 @@ Findings below are **provisional** until the fix exercises are done.
 | C | + Flowering time | Does phenology improve prediction? |
 
 **Todo (current position: mid-Exercise 2):**
-- [x] Exercise 1: Orient in trait data (173,960 rows, 94.8% yield coverage, 2014–2023)
-- [x] Exercise 2: Check auxiliary file coverage (table above)
+- [x] Exercise 1: Orient in trait data (173,960 rows, 94.8% yield coverage, 2014–2023) — `scripts/01-explore-trait-data.R`
+- [x] Exercise 2: Check auxiliary file coverage (table above) — `scripts/02-check-auxiliary-coverage.R`
+  - Both scripts were rebuilt 2026-10 and tested only on synthetic data; run on real data and confirm the `[OK]` checks
 - [ ] Exercise 2 remaining: Identify useful ML features from meta file
 - [ ] Exercise 3: Yield distribution and coverage deep-dive
 - [ ] Exercise 3 also: variance decomposition `Yield ~ (1|Env) + (1|Hybrid) + (1|Env:Hybrid)` — sets the ceiling per phase; confirm 2-year hybrid/tester blocks across all years
